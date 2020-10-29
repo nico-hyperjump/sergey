@@ -272,6 +272,26 @@ describe('Import compilation', () => {
 
     expect(output).toBe(desiredOutput);
   });
+
+  test('Nested imports', () => {
+    primeImport(
+      testImport('box.html'),
+      header(`<sergey-slot name="content" />`)
+    );
+    primeImport(testImport('box-content.html'), `<sergey-slot />`);
+    const content = '<h1>Header</h1>';
+
+    const desiredOutput = header(`${content}`);
+    const output = compileTemplate(`<sergey-import src="box">
+      <sergey-template name="content">
+        <sergey-import src="box-content">
+          ${content}
+        </sergey-import>
+      </sergey-template>
+    </sergey-import>`);
+
+    expect(output).toBe(desiredOutput);
+  });
 });
 
 describe('Markdown compilation', () => {

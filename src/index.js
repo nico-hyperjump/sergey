@@ -122,7 +122,7 @@ const writeFile = (path, body) => {
 const clearOutputFolder = async () => {
   const deleteFolder = path => {
     if (fs.existsSync(path)) {
-      fs.readdirSync(path).forEach(function(file, index) {
+      fs.readdirSync(path).forEach(function (file, index) {
         const newPath = path + '/' + file;
         if (fs.lstatSync(newPath).isDirectory()) {
           deleteFolder(newPath);
@@ -314,6 +314,14 @@ const compileImport = (body, pattern) => {
 };
 
 const compileTemplate = (body, slots = { default: '' }) => {
+  const domParser = new DOMParser();
+  let dom = domParser.parseFromString(body, 'text/html');
+  dom = dom.documentElement.lastElementChild.firstElementChild;
+
+  if (dom && dom.tagName === 'SERGEY-IMPORT') {
+    body = body.replace(dom.innerHTML, compileTemplate(dom.innerHTML));
+  }
+
   body = compileSlots(body, slots);
 
   if (!hasImports(body)) {
@@ -503,7 +511,7 @@ const sergeyRuntime = async () => {
 
     connect()
       .use(serveStatic(OUTPUT))
-      .listen(PORT, function() {
+      .listen(PORT, function () {
         console.log(`Sergey running on http://localhost:${PORT}`);
       });
   }
