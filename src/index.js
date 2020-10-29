@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const jsdom = require('jsdom');
 const { performance } = require('perf_hooks');
 const marked = require('marked');
 require('dotenv').config();
@@ -314,9 +315,10 @@ const compileImport = (body, pattern) => {
 };
 
 const compileTemplate = (body, slots = { default: '' }) => {
-  const domParser = new DOMParser();
-  let dom = domParser.parseFromString(body, 'text/html');
-  dom = dom.documentElement.lastElementChild.firstElementChild;
+  let dom = new jsdom.JSDOM(body, {
+    contentType: 'text/html'
+  });
+  dom = dom.window.document.body.lastElementChild;
 
   if (dom && dom.tagName === 'SERGEY-IMPORT') {
     body = body.replace(dom.innerHTML, compileTemplate(dom.innerHTML));
